@@ -1,5 +1,13 @@
+from django.contrib.auth.models import User
 from rest_framework import serializers
 from .models import Product
+
+
+class UserSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = User
+        fields = ['id', 'username']
 
 
 class ProductSerializer(serializers.Serializer):
@@ -7,6 +15,7 @@ class ProductSerializer(serializers.Serializer):
     name = serializers.CharField(required=False)
     price = serializers.DecimalField(required=False, decimal_places=2, max_digits=1000)
     quantity_in_stock = serializers.IntegerField(required=False)
+    owner = serializers.ReadOnlyField(source='owner.username')
 
     def create(self, validated_data):
         """ Cria e retorna uma nova instancia de Product """

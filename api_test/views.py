@@ -1,13 +1,25 @@
-from rest_framework import status
+from django.contrib.auth.models import User
+from rest_framework import status, generics, permissions, viewsets
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
+from rest_framework.reverse import reverse
 from api_test.models import Product
-from api_test.serializers import ProductSerializer
+from api_test.permissions import IsOwnerOrReadOnly
+from api_test.serializers import ProductSerializer, UserSerializer
+
+
+@api_view(['GET'])
+def api_root(request, format=None):
+    return Response({
+        'users': reverse('user-list', request=request, format=format),
+    })
 
 
 @api_view(['GET', 'POST'])
 def product_list(request):
     """ Lista os produtos """
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+
     if request.method == 'GET':
         product = Product.objects.all()
         serializer = ProductSerializer(product, many=True)
@@ -24,6 +36,7 @@ def product_list(request):
 @api_view(['GET', 'PUT', 'DELETE'])
 def product_detail(request, pk):
     """ Mostra, Atualiza um unico objeto """
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
     try:
         product = Product.objects.get(pk=pk)
@@ -45,6 +58,32 @@ def product_detail(request, pk):
     elif request.method == "DELETE":
         product.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+@api_view(['GET', 'POST'])
+def buy_product(request, pk):
+    try:
+        product = Product.objects.get(pk=pk)
+    except Product.DoesNotExist:
+        return Response(status=status.HTTP_404_NOT_FOUND)
+
+    if request.method == 'POST':
+        if product.quantity_in_stock - 1 != 0:
+            product.quantity_in_stock -= 1
+            product.save()
+            serializer = ProductSerializer(product, data=request.data)
+
+        if serializer.is_valid():
+            return Response(serializer.data, status=status.HTTP_202_ACCEPTED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+# Lista os usuarios.
+class UserViewSet(viewsets.ReadOnlyModelViewSet):
+    """ Esse viewset ja possui list e retrive automaticamente """
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+
 
 
 # codigo sem utilizar rest_api
