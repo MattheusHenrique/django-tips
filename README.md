@@ -127,3 +127,44 @@ Nela a configuração da api e simples e clara deixando facil de ser configurado
 
 Para mais informações sobre views: https://www.cdrf.co/
 
+## TOPICO AVANÇADO 2: Roteadores
+Considerando o modelo MVC em que existe views e controllers se faz o uso de uma classe que define em que lugar o 
+controller será utilizado. Em Djago quem faz o papel de controller são as classes ou funções presentes no arquivo 
+views.py (Em Django se usa um modelo similar ao MVC porem com outros nomes. Nesse caso quem faz o papel da visualização
+são as templates e as views são os controladores). Esse roteamento acontece no arquivo urls.py
+
+Olhe urls.py para ver o exemplo. 
+
+O Restframework tem algumas classes que ajudam no roteamento, entre elas, SimpleRouter, DefaultRouter e roteadores 
+personalizados.
+
+- SimpleRouter: com esse roteador ele oferece o conjunto padrão de açoẽs list, create, retrieve, update e destroy.
+Tambem podem receber metodos adicionais marcados como @action na views.
+  {prefixo}/: GET(list) e POST(create)
+  <br>
+  {prefixo/{url_path}/: GET ou metodos @actions
+  <br>
+  {prefixo}/{id}: GET(retrieve), PUT(update), PATCH(partial_update) e DELETE(destroy)
+  <br>
+  O uso do objeto e simples.
+```
+    router = SimpleRouter()
+    router.register('prefixo', ViewSet)
+ ```
+
+- DefaultRouter: similar ao SimpleRouter porem gera hiperlinks e rotas para .json. (Melhor para ser usado)
+
+- Roteadores customizados: E possivel criar seus proprios roteadores extendendo uma classe de roteador ja existente. 
+Assim é possivel criar seus proprios roteadores com comportamentos diferentes.
+  
+Para mais informações: https://www.django-rest-framework.org/api-guide/routers/
+
+
+
+
+
+
+
+
+
+
